@@ -1051,6 +1051,11 @@ AC_ARG_ENABLE(spam_report-plugin,
 		[  --disable-spam_report-plugin    Do not build spam_report plugin],
 		[enable_spam_report_plugin=$enableval], [enable_spam_report_plugin=auto])
 
+dnl Special Chars plugin
+AC_ARG_ENABLE(specialchars-plugin,
+		[  --disable-specialchars-plugin          Do not build specialchars plugin],
+		[enable_specialchars_plugin=$enableval], [enable_specialchars_plugin=auto])
+
 AC_ARG_ENABLE(tnef_parse-plugin,
 		[  --disable-tnef_parse-plugin     Do not build tnef_parse plugin],
 		[enable_tnef_parse_plugin=$enableval], [enable_tnef_parse_plugin=auto])
@@ -1393,6 +1398,15 @@ if test x"$enable_clamd_plugin" != xno; then
 	AC_MSG_RESULT(yes)
 else
 	DISABLED_PLUGINS="$DISABLED_PLUGINS clamd"
+	AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING([whether to build specialchars plugin])
+if test x"$enable_specialchars_plugin" != xno; then
+	PLUGINS="$PLUGINS specialchars"
+	AC_MSG_RESULT(yes)
+else
+	DISABLED_PLUGINS="$DISABLED_PLUGINS specialchars"
 	AC_MSG_RESULT(no)
 fi
 
@@ -1879,6 +1893,7 @@ AM_CONDITIONAL(BUILD_SPAM_REPORT_PLUGIN,	test x"$enable_spam_report_plugin" != x
 AM_CONDITIONAL(BUILD_TNEF_PARSE_PLUGIN,		test x"$enable_tnef_parse_plugin" != xno)
 AM_CONDITIONAL(BUILD_VCALENDAR_PLUGIN,		test x"$enable_vcalendar_plugin" != xno)
 
+AM_CONDITIONAL(BUILD_SPECIALCHARS_PLUGIN,		test x"$enable_specialchars_plugin" != xno)
 
 dnl ****************************
 dnl ** Final configure output **
@@ -1927,6 +1942,7 @@ src/plugins/rssyl/libfeed/Makefile
 src/plugins/smime/Makefile
 src/plugins/spamassassin/Makefile
 src/plugins/spam_report/Makefile
+src/plugins/specialchars/Makefile
 src/plugins/tnef_parse/Makefile
 src/plugins/vcalendar/Makefile
 src/plugins/vcalendar/libical/Makefile
