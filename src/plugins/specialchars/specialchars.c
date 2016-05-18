@@ -85,10 +85,11 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
   gint u8ch_len;
   gunichar uch;
 
-  debug_print("specialchars_cb");
+  debug_print("specialchars_cb\n");
 
   //message(dialog, "Special Chars is alive!");
 
+  debug_print("Constructing automaton.");
   Automaton *a = generate_automaton(substs, sizeof(substs) / sizeof(Substitution));
   print_automaton(*a);
   load_automaton(*a);
@@ -116,7 +117,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
     }
   }
 
-  g_print("Constructing automaton");
+  free_automaton(a);
   return;
 }
 

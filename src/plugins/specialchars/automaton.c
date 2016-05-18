@@ -163,8 +163,26 @@ Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
   a->size = size;
   a->accept = (AcceptFunc) accept_replace;
   a->accept_data = subst_table;
+  a->free_accept_data = (FreeDataFunc) g_hash_table_destroy;
 
   return a;
+}
+
+void free_automaton_data(Automaton a) {
+  g_free(a.table);
+
+  if (a.free_accept_data != NULL) {
+    (*a.free_accept_data)(a.accept_data);
+  }
+
+  return;
+}
+
+void free_automaton(Automaton *a) {
+  free_automaton_data(*a);
+  g_free(a);
+
+  return;
 }
 
 
