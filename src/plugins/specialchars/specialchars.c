@@ -97,7 +97,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
 
   gtk_text_buffer_get_start_iter(buffer, &iter);
 
-  if (find_specialchar(&iter)) {
+  while (find_specialchar(&iter)) {
     //message(dialog, "Found the char.");
     start_iter = iter;
     if (match_iter(&iter, &subst_string)) {
@@ -115,6 +115,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
       gtk_text_buffer_delete(buffer, &start_iter, &end_iter);
       gtk_text_buffer_insert(
           buffer, &start_iter, u8ch, u8ch_len);
+      iter = start_iter;
     }
   }
 
