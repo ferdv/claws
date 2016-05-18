@@ -254,6 +254,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
         perror(NULL);
         fclose(f);
       }
+      g_free(buf);
     }
   }
 
@@ -282,6 +283,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
   if (fread(new.table, sizeof(StateTransition), new.size, f) < new.size) {
     debug_print("Error while trying to read %d state transitions.\n", new.size);
     perror(NULL);
+    g_free(new.table);
     fclose(f);
     return FALSE;
   }
