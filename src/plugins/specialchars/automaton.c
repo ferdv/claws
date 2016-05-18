@@ -167,14 +167,21 @@ Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
   return a;
 }
 
-static gint next_state(
-    Automaton a,
-    guint state, 
-    gunichar ch) {
 
-  for (int i = 0; i < a.size; ++i) {
-    if (a.table[i].from_state == state && a.table[i].input == ch)
+static gint next_state(Automaton a, guint state, gunichar ch) {
+  
+  static guint last = 0;
+
+  /* State transitions are assumed to be sorted by source state.
+   * We optimise (a little) for lookups of subsequent source states. */
+  if (a.table[last].from_state > state)
+    last = 0;
+
+  for (int i = last; i < a.size; ++i) {
+    if (a.table[i].from_state == state && a.table[i].input == ch) {
+      last = i;
       return a.table[i].to_state;
+    }
   }
 
   return -1;
