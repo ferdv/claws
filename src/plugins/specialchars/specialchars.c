@@ -93,6 +93,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
   Automaton *a = generate_automaton(substs, sizeof(substs) / sizeof(Substitution));
   print_automaton(*a);
   load_automaton(*a);
+  dump_automaton(*a, "test.dfa");
 
   gtk_text_buffer_get_start_iter(buffer, &iter);
 

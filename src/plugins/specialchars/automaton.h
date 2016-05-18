@@ -15,6 +15,11 @@ typedef gboolean (*AcceptFunc)(guint state, gpointer data, gpointer result);
 
 typedef void (*FreeDataFunc)(gpointer);
 
+typedef gboolean (*DumpDataFunc)(
+    gpointer accept_data, 
+    void **outbuffer, 
+    guint *size);
+
 
 struct StateTransition_ {
   guint from_state;
@@ -29,8 +34,6 @@ struct Substitution_ {
 
 
 Automaton example_automaton;
-
-
 
 Automaton new_automaton(
     StateTransition *table, 
@@ -52,7 +55,7 @@ gboolean match_automaton_iter(Automaton a, GtkTextIter *iter, gpointer result);
 
 gboolean match_iter(GtkTextIter *iter, gpointer result);
 
-
+gboolean dump_automaton(Automaton a, const gchar *fname);
 
 struct Automaton_ {
   StateTransition *table;
@@ -60,6 +63,7 @@ struct Automaton_ {
   AcceptFunc accept;
   gpointer accept_data;
   FreeDataFunc free_accept_data;
+  DumpDataFunc dump_accept_data;
 };
 
 #endif /* __AUTOMATON_H__ */

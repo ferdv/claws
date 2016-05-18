@@ -91,6 +91,35 @@ gboolean accept_replace(guint state, GHashTable *table, gchar **out) {
   }
 }
 
+gboolean dump_hash_table(GHashTable *table, gchar **buffer, guint *size) {
+  guint elements = g_hash_table_size(table);
+  GHashTableIter iter;
+  gchar *str, *bufp;
+  gpointer pkey;
+  
+  *size = 0;
+
+  g_hash_table_iter_init(&iter, table);
+  while (g_hash_table_iter_next(&iter, &pkey, (gpointer) &str)) {
+    *size += sizeof(guint) + strlen(str) + 1;
+  }
+
+  debug_print("Dumping hash table %d %u\n", elements, *size);
+  *buffer = g_new(gchar, *size);
+  bufp = *buffer;
+  g_hash_table_iter_init(&iter, table);
+  while (g_hash_table_iter_next(&iter, &pkey, (gpointer) &str)) {
+    debug_print("%d -> %s.\n", GPOINTER_TO_INT(pkey), str);
+    memcpy(bufp, &pkey, sizeof(GPOINTER_TO_INT(pkey)));
+    bufp += sizeof(GPOINTER_TO_INT(pkey));
+    bufp = g_stpcpy(bufp, str);
+    ++bufp;
+  }
+  debug_print("");
+
+  return TRUE;
+}
+
 Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
   gchar *ch;
   guint state, prevstate, freshstate;
@@ -164,6 +193,7 @@ Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
   a->accept = (AcceptFunc) accept_replace;
   a->accept_data = subst_table;
   a->free_accept_data = (FreeDataFunc) g_hash_table_destroy;
+  a->dump_accept_data = (DumpDataFunc) dump_hash_table;
 
   return a;
 }
@@ -185,6 +215,89 @@ void free_automaton(Automaton *a) {
   return;
 }
 
+gboolean dump_automaton(Automaton a, const gchar *fname) {
+  FILE *f;
+  debug_print("Construct fullpath...\n");
+  gchar *fullpath = g_strconcat(get_rc_dir(), G_DIR_SEPARATOR_S, fname, NULL);
+
+  debug_print("Dumping automaton data to %s (size = %d)...\n", fullpath, a.size);
+  if ((f = g_fopen(fullpath, "wb")) == NULL) {
+    debug_print("Failed to open file %s for writing.\n", fullpath);
+    perror(NULL);
+    return FALSE;
+  }
+
+  // write the size
+  if (fwrite(&a.size, sizeof(a.size), 1, f) < 1) {
+    debug_print("Error while trying to write the table size. ");
+    perror(NULL);
+    fclose(f);
+    return FALSE;
+  }
+
+  if (fwrite(a.table, sizeof(StateTransition), a.size, f) < a.size) {
+    debug_print("Error while trying to dump %d state transitions.\n", a.size);
+    perror(NULL);
+    fclose(f);
+    return FALSE;
+  }
+
+  if (a.accept_data != NULL && a.dump_accept_data != NULL) {
+    gchar *buf;
+    guint size;
+
+    // get the dump of the accept data & add it to the file
+    if ((*a.dump_accept_data)(a.accept_data, (gpointer) &buf, &size)) {
+      if (fwrite(buf, sizeof(gchar), size, f) < size) {
+        debug_print("Error while trying to dump %d bytes of accept data.\n", 
+            size);
+        perror(NULL);
+        fclose(f);
+      }
+    }
+  }
+
+  fclose(f);
+
+  Automaton new;
+
+  debug_print("Reading automaton data from %s...\n", fullpath);
+  if ((f = g_fopen(fullpath, "rb")) == NULL) {
+    debug_print("Failed to open file %s for reading.\n", fullpath);
+    perror(NULL);
+    return FALSE;
+  }
+
+  // read the size
+  if (fread(&new.size, sizeof(new.size), 1, f) < 1) {
+    debug_print("Error while reading the table size. ");
+    perror(NULL);
+    fclose(f);
+    return FALSE;
+  }
+
+  debug_print("Read size: %d.\n", new.size);
+  new.table = g_new(StateTransition, new.size);
+
+  if (fread(new.table, sizeof(StateTransition), new.size, f) < new.size) {
+    debug_print("Error while trying to read %d state transitions.\n", new.size);
+    perror(NULL);
+    fclose(f);
+    return FALSE;
+  }
+
+  debug_print("Automaton read.\n");
+
+  if (a.size == new.size && memcmp(a.table, new.table, new.size) == 0) {
+    debug_print("Same automaton.\n");
+  }
+  else {
+    debug_print("VERIFICATION FAILED.\n");
+  }
+
+  g_free(new.table);
+  return TRUE;
+}
 
 static gint next_state(Automaton a, guint state, gunichar ch) {
   
