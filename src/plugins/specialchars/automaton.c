@@ -2,6 +2,7 @@
 #include "automaton.h"
 
 #include "utils.h"
+#include "sc_utils.h"
 
 static StateTransition example_states[] = {
   {0, '\\', 1},
@@ -217,12 +218,12 @@ void free_automaton(Automaton *a) {
 
 gboolean dump_automaton(Automaton a, const gchar *fname) {
   FILE *f;
-  debug_print("Construct fullpath...\n");
-  gchar *fullpath = g_strconcat(get_rc_dir(), G_DIR_SEPARATOR_S, fname, NULL);
+  gchar *fullpath = rc_filepath(fname); //g_strconcat(get_rc_dir(), G_DIR_SEPARATOR_S, fname, NULL);
 
   debug_print("Dumping automaton data to %s (size = %d)...\n", fullpath, a.size);
   if ((f = g_fopen(fullpath, "wb")) == NULL) {
     debug_print("Failed to open file %s for writing.\n", fullpath);
+    g_free(fullpath);
     perror(NULL);
     return FALSE;
   }
@@ -266,6 +267,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
   if ((f = g_fopen(fullpath, "rb")) == NULL) {
     debug_print("Failed to open file %s for reading.\n", fullpath);
     perror(NULL);
+    g_free(fullpath);
     return FALSE;
   }
 
@@ -274,6 +276,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
     debug_print("Error while reading the table size. ");
     perror(NULL);
     fclose(f);
+    g_free(fullpath);
     return FALSE;
   }
 
@@ -285,6 +288,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
     perror(NULL);
     g_free(new.table);
     fclose(f);
+    g_free(fullpath);
     return FALSE;
   }
 
@@ -297,6 +301,7 @@ gboolean dump_automaton(Automaton a, const gchar *fname) {
     debug_print("VERIFICATION FAILED.\n");
   }
 
+  g_free(fullpath);
   g_free(new.table);
   return TRUE;
 }

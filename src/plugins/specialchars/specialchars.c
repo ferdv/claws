@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "automaton.h"
+#include "sc_utils.h"
 
 #include "version.h"
 #include "claws.h"
@@ -33,34 +34,13 @@
 #include "log.h"
 #include "menu.h"
 
-#define PLUGIN_NAME (_("Special Chars"))
+#include "defs.h"
 
 static Substitution substs[] = {
   {"\\rightarrow", "U+2192"},
   {"\\rightalarm", "U+0040"},
   {"\\Rightarrow", "U+21D2"},
 };
-
-#define message_dialog(...)  (gtk_message_dialog_new(\
-      (GtkWindow *) compose->window,\
-      GTK_DIALOG_DESTROY_WITH_PARENT,\
-      GTK_MESSAGE_INFO,\
-      GTK_BUTTONS_OK,\
-      __VA_ARGS__))
-
-#define message(dlg, ...) (\
-    dlg = message_dialog(__VA_ARGS__),\
-    gtk_dialog_run(GTK_DIALOG(dlg)),\
-    gtk_widget_destroy(dlg));
-
-/*static gboolean is_specialchar(gunichar ch, gpointer data) {
-  switch (ch) {
-    case '\\':
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}*/
 
 static gboolean find_specialchar(GtkTextIter *iter) {
   do {
@@ -98,7 +78,6 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
   gtk_text_buffer_get_start_iter(buffer, &iter);
 
   while (find_specialchar(&iter)) {
-    //message(dialog, "Found the char.");
     start_iter = iter;
     if (match_iter(&iter, &subst_string)) {
       gtk_text_iter_forward_char(&iter);
@@ -106,8 +85,8 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
       sscanf(subst_string, "U+%06X", &uch);
       u8ch_len = g_unichar_to_utf8(uch, u8ch);
       u8ch[u8ch_len] = '\0';
-      message(dialog, 
-          "Found string at %d-%d. To be substituted with \"%s\" (U+%04X)", 
+      info_message(dialog, 
+          "Found string at %d-%d. To be substituted with \"%s\"", 
           gtk_text_iter_get_offset(&start_iter),
           gtk_text_iter_get_offset(&end_iter),
           u8ch,
