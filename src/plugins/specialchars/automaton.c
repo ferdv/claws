@@ -218,7 +218,7 @@ void free_automaton(Automaton *a) {
 
 gboolean dump_automaton(Automaton a, const gchar *fname) {
   FILE *f;
-  gchar *fullpath = rc_filepath(fname); //g_strconcat(get_rc_dir(), G_DIR_SEPARATOR_S, fname, NULL);
+  gchar *fullpath = rc_filepath(fname);
 
   debug_print("Dumping automaton data to %s (size = %d)...\n", fullpath, a.size);
   if ((f = g_fopen(fullpath, "wb")) == NULL) {

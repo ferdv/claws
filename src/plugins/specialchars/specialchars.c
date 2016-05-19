@@ -37,13 +37,6 @@
 
 #include "defs.h"
 
-
-/*static Substitution substs[] = {
-  {"\\rightarrow", "U+2192"},
-  {"\\rightalarm", "U+0040"},
-  {"\\Rightarrow", "U+21D2"},
-};*/
-
 static gboolean find_specialchar(GtkTextIter *iter) {
   do {
     switch (gtk_text_iter_get_char(iter)) {
@@ -71,10 +64,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
 
   debug_print("specialchars_cb\n");
 
-  //message(dialog, "Special Chars is alive!");
-
   debug_print("Loading substitutions.");
-
   
   if (!subst_load_from_file("substs.ini",  &substs, NULL/*&error*/)) {
     debug_print("Loading failed.");

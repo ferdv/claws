@@ -1,6 +1,5 @@
 
 #include <string.h>
-//#include <locale.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -15,47 +14,6 @@
 #define do_file_error(gerror, msg) (\
     debug_print("%s\n", msg),\
     g_set_error_literal(gerror, G_FILE_ERROR, 0, msg))
-
-
-/*enum parse_state = {
-  SPACE,
-  SEARCH,
-  SUBST,
-  COMMENT
-};
-*/
-/*
-inline gchar *eat_until_endline(gchar *contents, gchar *end) {
-  // ignore the rest of the line 
-  while (contents < end && *contents != '\n')
-    ++contents;
-
-  if (*contents == '\n')
-    ++contents;
-
-  return contents;
-}
-
-inline gchar *eat_whitespace(gchar *contents, gchar *end) {
-  while (contents < end && *contents == ' ' || *contents == '\t')
-    ++contents;
-
-  return contents;
-}
-
-inline gchar *eat_string(gchar *contents, gchar *end, gchar **output) {
-  const gchar *start = contents;
-
-  while (contents < end && g_ascii_isprint(*contents))
-    ++contents;
-  
-  if (contents - start > 0) {
-    *output = g_new(gchar, contents - start + 1);
-    memcpy(
-  }
-
-}
-*/
 
 void subst_print_substs(struct Substs substs) {
   for (int i = 0; i < substs.count; ++i) {
@@ -89,12 +47,7 @@ gboolean subst_load_from_file(
 
   gchar *path = rc_filepath(fname);
   gsize count;
-  //GMappedFile *file;
   GError *error = NULL;
-  //gchar *contents, *end, *token_start;
-  //guint line = 1;
-  //gchar *linebuf[256];
-  //parse_state state = SPACE;
   gchar *errormsg = NULL;
 
   GKeyFile *file = g_key_file_new();
@@ -144,67 +97,5 @@ gboolean subst_load_from_file(
   g_key_file_free(file);
 
   return TRUE;
-  
-/*  if ((file = g_mapped_file_new(path, FALSE, &error)) == NULL) {
-    debug_print("Error opening %s: %s\n", path, error->message);
-    g_free(path);
-    g_propagate_error(out_error, error);
-    return FALSE;
-  }
-
-  g_free(path);
-
-  if ((contents = g_mapped_file_get_contents(file)) == NULL) {
-    debug_print("File is empty.\n");
-    g_mapped_file_unref(file);
-    return FALSE;
-  }
-
-  end = contents + g_mapped_file_get_length(file);
-
-  while (contents < end) {
-    eat_whitespace(contents);
-
-    switch (*contents) {
-      case '#':
-        eat_until_endline(contents);
-        break;
-      case '\n':
-        switch (state) { 
-          case SPACE:
-          case COMMENT:
-            state = SPACE;
-            ++line;
-            break;
-          case SEARCH:
-            errormsg = g_strdup_printf(
-                _("%s: Error parsing symbols file, line %d"), 
-                PLUGIN_NAME, 
-                line);
-            debug_print("%s\n", errormsg);
-            g_set_error_literal(out_error, G_FILE_ERROR, 0, errormsg);
-            goto error;
-          case SUBST:
-
-            break;
-        }
-      case ' ':
-      case '\t':
-        switch (state) {
-          case SUBST:
-
-        }
-        break;
-      default:
-        break;
-    }
-    ++contents;
-  }
-  return TRUE;
-
-error:
-  
-  return FALSE;*/
 } 
-
 
