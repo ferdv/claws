@@ -29,8 +29,7 @@ void put_subst(Substitution *subst, gchar *replace, gchar *with) {
   if (sscanf(with, "U+%06X", &uch)) {
     u8ch_len = g_unichar_to_utf8(uch, u8ch);
     u8ch[u8ch_len] = '\0';
-    g_free(with);
-    with = g_new(gchar, strlen(u8ch) + 1);
+    g_assert_cmpuint(u8ch_len, <, strlen(with));
     strcpy(with, u8ch);
   }
 
