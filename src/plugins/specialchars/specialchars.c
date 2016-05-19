@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 
 #include "automaton.h"
+#include "subst.h"
 #include "sc_utils.h"
 
 #include "version.h"
@@ -36,11 +37,12 @@
 
 #include "defs.h"
 
-static Substitution substs[] = {
+
+/*static Substitution substs[] = {
   {"\\rightarrow", "U+2192"},
   {"\\rightalarm", "U+0040"},
   {"\\Rightarrow", "U+21D2"},
-};
+};*/
 
 static gboolean find_specialchar(GtkTextIter *iter) {
   do {
@@ -64,13 +66,26 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
   gchar *subst_string, u8ch[7];
   gint u8ch_len;
   gunichar uch;
+  struct Substs substs;
+  GError *error;
 
   debug_print("specialchars_cb\n");
 
   //message(dialog, "Special Chars is alive!");
 
-  debug_print("Constructing automaton.");
-  Automaton *a = generate_automaton(substs, sizeof(substs) / sizeof(Substitution));
+  debug_print("Loading substitutions.");
+
+  
+  if (!subst_load_from_file("substs.ini",  &substs, NULL/*&error*/)) {
+    debug_print("Loading failed.");
+    return;
+  }
+  else {
+    subst_print_substs(substs);
+  }
+ 
+  debug_print("Constructing automaton.\n");
+  Automaton *a = generate_automaton(substs.data, substs.count); // TODO
   print_automaton(*a);
   load_automaton(*a);
   dump_automaton(*a, "test.dfa");
@@ -79,21 +94,18 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
 
   while (find_specialchar(&iter)) {
     start_iter = iter;
+    gtk_text_iter_forward_char(&iter);
     if (match_iter(&iter, &subst_string)) {
       gtk_text_iter_forward_char(&iter);
       end_iter = iter;
-      sscanf(subst_string, "U+%06X", &uch);
-      u8ch_len = g_unichar_to_utf8(uch, u8ch);
-      u8ch[u8ch_len] = '\0';
       info_message(dialog, 
           "Found string at %d-%d. To be substituted with \"%s\"", 
           gtk_text_iter_get_offset(&start_iter),
           gtk_text_iter_get_offset(&end_iter),
-          u8ch,
-          uch);
+          subst_string);
       gtk_text_buffer_delete(buffer, &start_iter, &end_iter);
       gtk_text_buffer_insert(
-          buffer, &start_iter, u8ch, u8ch_len);
+          buffer, &start_iter, subst_string, strlen(subst_string));
       iter = start_iter;
     }
   }

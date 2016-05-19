@@ -136,7 +136,7 @@ Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
   freshstate = 1;
 
   for (int i = 0; i < numsubsts; ++i) {
-    ch = substs[i].find;
+    ch = substs[i].replace;
     state = 0;
     prevstate = 0;
     do {
@@ -168,7 +168,7 @@ Automaton *generate_automaton(Substitution *substs, guint numsubsts) {
     g_hash_table_insert(
         subst_table, 
         GINT_TO_POINTER(state), 
-        substs[i].subst);
+        substs[i].with);
   }
   
   //int size = g_hash_table_size(table);

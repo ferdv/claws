@@ -9,9 +9,10 @@ if BUILD_SPECIALCHARS_PLUGIN
 plugin_LTLIBRARIES = specialchars.la
 endif
 
-specialchars_la_SOURCES = \
-	automaton.c automaton.h \
-	specialchars.c
+specialchars_la_SOURCES = defs.h sc_utils.h \
+													automaton.c automaton.h \
+													subst.c subst.h \
+													specialchars.c
 
 specialchars_la_LDFLAGS = \
 	-avoid-version -module

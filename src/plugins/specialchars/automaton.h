@@ -4,12 +4,11 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "subst.h"
 
 typedef struct Automaton_ Automaton;
 
 typedef struct StateTransition_ StateTransition;
-
-typedef struct Substitution_ Substitution;
 
 typedef gboolean (*AcceptFunc)(guint state, gpointer data, gpointer result);
 
@@ -26,12 +25,6 @@ struct StateTransition_ {
   gunichar input;
   gint to_state;
 };
-
-struct Substitution_ {
-  char *find;
-  char *subst;
-};
-
 
 Automaton example_automaton;
 
