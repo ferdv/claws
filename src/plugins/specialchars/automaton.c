@@ -311,8 +311,9 @@ static gint next_state(Automaton a, guint state, gunichar ch) {
   static guint last = 0;
 
   /* State transitions are assumed to be sorted by source state.
-   * We optimise (a little) for lookups of subsequent source states. */
-  if (a.table[last].from_state > state)
+   * We optimise (a little) for lookups of subsequent source states. This 
+   * would be wrong if we had cycles / iteration. */
+  if (a.table[last].from_state >= state)
     last = 0;
 
   for (int i = last; i < a.size; ++i) {
@@ -341,7 +342,7 @@ gboolean match_automaton_iter(Automaton a, GtkTextIter *iter, gpointer result) {
 
     nstate = next_state(a, state, ch);
     
-    debug_print("State transition: %d to %d\n", state, nstate);
+    debug_print("State transition on %c from %d to %d\n", ch, state, nstate);
 
     if (nstate == -1)
       return FALSE;
