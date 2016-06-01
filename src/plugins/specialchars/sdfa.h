@@ -34,7 +34,7 @@ struct SDFA_ {
 };
 
 SDFA *sdfa_new(StateTransition *table, gint size);
-SDFA *sdfa_new_copy(StateTransition *table, gint size);
+SDFA *sdfa_new_copy(const StateTransition *table, gint size);
 
 void sdfa_free(SDFA *a);
 

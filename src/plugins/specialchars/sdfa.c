@@ -18,11 +18,10 @@ SDFA *sdfa_new(StateTransition *table, gint size) {
   return a;
 }
 
-SDFA *sdfa_new_copy(StateTransition *table, gint size) {
+SDFA *sdfa_new_copy(const StateTransition *table, gint size) {
   SDFA *a = g_new(SDFA, 1);
   a->table = g_new(StateTransition, size);
   memcpy(a->table, table, size);
-  a->table = table;
   a->table_size = size;
 
   return a;
