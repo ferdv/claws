@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
-#include "automaton.h"
+#include "sdfa.h"
 #include "subst.h"
 #include "sc_utils.h"
 
@@ -74,18 +74,23 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
     subst_print_substs(substs);
   }
  
+  debug_print("with_buffer = %p\n", substs.with_buffer);
   debug_print("Constructing automaton.\n");
-  Automaton *a = generate_automaton(substs.data, substs.count); // TODO
-  print_automaton(*a);
-  load_automaton(*a);
-  dump_automaton(*a, "test.dfa");
+  SDFA *a = sdfa_generate(&substs); // TODO
+  if (a == NULL) {
+    debug_print("Automaton not generated.\n");
+    return;
+  }
+  sdfa_print(*a);
+  sdfa_load(*a);
+  sdfa_dump(*a, "test.dfa");
 
   gtk_text_buffer_get_start_iter(buffer, &iter);
 
   while (find_specialchar(&iter)) {
     start_iter = iter;
     gtk_text_iter_forward_char(&iter);
-    if (match_iter(&iter, &subst_string)) {
+    if (sdfa_match_iter(&iter, &subst_string)) {
       gtk_text_iter_forward_char(&iter);
       end_iter = iter;
       info_message(dialog, 
@@ -100,7 +105,7 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
     }
   }
 
-  free_automaton(a);
+  sdfa_free(a);
   return;
 }
 

@@ -21,7 +21,7 @@ void subst_print_substs(struct Substs substs) {
   }
 }
 
-void put_subst(Substitution *subst, gchar *replace, gchar *with) {
+size_t put_subst(Substitution *subst, gchar *replace, gchar *with) {
   gchar u8ch[7];
   gint u8ch_len;
   gunichar uch;
@@ -36,7 +36,43 @@ void put_subst(Substitution *subst, gchar *replace, gchar *with) {
   subst->replace = replace;
   subst->with = with;
 
-  return;
+  return strlen(with);
+}
+
+/* pack the substitution strings into a contiguous buffer for easy caching */
+gchar *pack_with_data(struct Substs *substs, gsize bufstep) {
+  gsize bufsize = substs->count * bufstep;
+  debug_print("bufsize = %lu, bufstep = %lu, count = %d\n", bufsize, bufstep, substs->count);
+  gchar *buffer = g_new(gchar, bufsize);
+  gchar *current = buffer;
+
+  for (int i = 0; i < substs->count; ++i, current += bufstep) {
+    g_assert(current < buffer + bufsize);
+    g_assert_cmpuint(strlen(substs->data[i].with), <, bufstep);
+    strncpy(current, substs->data[i].with, bufstep);
+    g_free(substs->data[i].with);
+    substs->data[i].with = current;
+  }
+
+  debug_print("with_buffer = %p\n", buffer);
+  substs->with_buffer_size = bufsize;
+  substs->with_buffer = buffer;
+
+  return buffer;
+}
+
+gboolean subst_with_data_packed(struct Substs *substs) {
+  if ((substs->with_buffer == NULL) || (substs->with_buffer_size == 0))
+    return FALSE;
+
+  gchar *first = substs->data[0].with;
+  gchar *last = substs->data[substs->count - 1].with;
+  gchar *buffer_end = substs->with_buffer + substs->with_buffer_size;
+  debug_print("first = %p, last = %p, with_buffer = %p, end = %p\n", first, last,  substs->with_buffer, buffer_end);
+  if (first == substs->with_buffer && last < buffer_end)
+    return TRUE;
+
+  return FALSE;
 }
 
 gboolean subst_load_from_file(
@@ -78,8 +114,13 @@ gboolean subst_load_from_file(
     return FALSE;
   }
 
+  debug_print("count = %d", count);
   substs->count = count;
   substs->data = g_new(Substitution, count);
+  substs->with_buffer = NULL;
+  substs->with_buffer_size = 0;
+
+  gsize longest = 0;
 
   for (int i = 0; i < count; ++i) {
     gchar *val;
@@ -89,8 +130,10 @@ gboolean subst_load_from_file(
       continue;
     }
 
-    put_subst(&substs->data[i], keys[i], val);
+    longest = MAX(longest, put_subst(&substs->data[i], keys[i], val));
   }
+
+  pack_with_data(substs, longest + 1);
 
   g_free(path);
   g_key_file_free(file);

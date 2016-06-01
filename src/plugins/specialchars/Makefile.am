@@ -10,7 +10,7 @@ plugin_LTLIBRARIES = specialchars.la
 endif
 
 specialchars_la_SOURCES = defs.h sc_utils.h \
-													automaton.c automaton.h \
+			  sdfa.c sdfa.h \
 													subst.c subst.h \
 													specialchars.c
 
