@@ -349,7 +349,6 @@ gboolean sdfa_match_iter_automaton(SDFA a, GtkTextIter *iter, gchar **result) {
     debug_print("State transition on %c from %d to %d\n", ch, state, nstate);
 
     if (nstate == -1) {
-      gtk_text_iter_backward_char(iter);
       break;
     }
 
@@ -359,6 +358,7 @@ gboolean sdfa_match_iter_automaton(SDFA a, GtkTextIter *iter, gchar **result) {
 
   // if we have a result, the last transition was an "accepting" one
   if (result_offset >= 0) {
+    gtk_text_iter_backward_char(iter);
     debug_print("to->state %d: result = %d\n", state, result_offset);
     *result = a.subst_buffer + result_offset;
     return TRUE;
