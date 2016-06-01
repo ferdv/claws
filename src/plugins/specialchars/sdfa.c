@@ -58,22 +58,14 @@ static gint key_compare(gconstpointer a, gconstpointer b, gpointer data) {
   return a - b;
 }
 
-gboolean traverse(guint *a, StateTransition *st, StateTransition **st_table) {
+static gboolean traverse_tree(
+    guint *a,
+    StateTransition *st,
+    StateTransition **st_table) {
+
   **st_table = *st;
   ++(*st_table);
   return FALSE;
-}
-
-gboolean accept_replace(guint state, GHashTable *table, gchar **out) {
-  gchar *str;
-  if ((str = g_hash_table_lookup(table, GINT_TO_POINTER(state))) != NULL) {
-    debug_print("State %d, substitute with %s.\n", state, str);
-    *out = str;
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
 }
 
 gboolean dump_hash_table(GHashTable *table, gchar **buffer, guint *size) {
@@ -167,7 +159,7 @@ SDFA *sdfa_generate(struct Substs *substs) {
   st_table = g_new(StateTransition, size);
   StateTransition *first = st_table;
 
-  g_tree_foreach(tree, (GTraverseFunc) traverse, &first);
+  g_tree_foreach(tree, (GTraverseFunc) traverse_tree, &first);
   g_tree_destroy(tree);
 
   SDFA *a = g_new(SDFA, 1);
