@@ -11,7 +11,7 @@
 static SDFA sdfa_;
 
 SDFA *sdfa_new(StateTransition *table, gint size) {
-  SDFA *a = g_new(SDFA, 1); //{table, size, accept, accept_data};
+  SDFA *a = g_new(SDFA, 1);
   a->table = table;
   a->table_size = size;
 
@@ -111,8 +111,6 @@ SDFA *sdfa_generate(struct Substs *substs) {
   guint state, prevstate, freshstate;
   guint key;
   StateTransition *st, *st_table;
-  /*GHashTable *table =
-    g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);*/
 
   if (!subst_with_data_packed(substs)) {
     debug_print("With data not packed!\n");
@@ -120,9 +118,6 @@ SDFA *sdfa_generate(struct Substs *substs) {
   }
 
   GTree *tree = g_tree_new_full(key_compare, NULL, NULL, g_free);
-  //GHashTableIter iter;
-/*  GHashTable *subst_table =
-    g_hash_table_new(g_direct_hash, g_direct_equal);*/
 
   freshstate = 1;
 
@@ -133,7 +128,6 @@ SDFA *sdfa_generate(struct Substs *substs) {
     do {
       key = pair_key(state, *ch);
 
-      //if ((st = g_hash_table_lookup(table, GINT_TO_POINTER(key))) == NULL) {
       if ((st = g_tree_lookup(tree, GINT_TO_POINTER(key))) == NULL) {
         st = g_new(StateTransition, 1);
         st->from = state;
@@ -145,7 +139,6 @@ SDFA *sdfa_generate(struct Substs *substs) {
         ++freshstate;
         debug_print("Char %c, key %d not found. Inserting %d -- %c -> %d.\n",
             *ch, key, st->from, st->input, st->to);
-        //g_hash_table_insert(table, GINT_TO_POINTER(key), st);
         g_tree_insert(tree, GINT_TO_POINTER(key), st);
       }
       else if (*ch != st->input) {
@@ -169,25 +162,11 @@ SDFA *sdfa_generate(struct Substs *substs) {
       g_tree_destroy(tree);
       return NULL;
     }
-/*    g_hash_table_insert(
-        subst_table,
-        GINT_TO_POINTER(state),
-        substs[i].with);*/
   }
 
-  //int size = g_hash_table_size(table);
   int size = g_tree_nnodes(tree);
   st_table = g_new(StateTransition, size);
   StateTransition *first = st_table;
-/*  g_hash_table_iter_init(&iter, table);
-  int i = 0;
-  gpointer pkey;
-  while (g_hash_table_iter_next(&iter, &pkey, &st)) {
-    st_table[i] = *st;
-    ++i;
-  }
-
-  g_hash_table_destroy(table);*/
 
   g_tree_foreach(tree, (GTraverseFunc) traverse, &first);
   g_tree_destroy(tree);
@@ -197,10 +176,6 @@ SDFA *sdfa_generate(struct Substs *substs) {
   a->table_size = size;
   a->subst_buffer = substs->with_buffer;
   a->subst_buffer_size = substs->with_buffer_size;
-//  a->accept = (AcceptFunc) accept_replace;
-//  a->accept_data = subst_table;
-//  a->free_accept_data = (FreeDataFunc) g_hash_table_destroy;
-//  a->dump_accept_data = (DumpDataFunc) dump_hash_table;
 
   return a;
 }

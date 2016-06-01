@@ -40,17 +40,14 @@ void sdfa_free(SDFA *a);
 
 void sdfa_load(SDFA a);
 
-//SDFA *sdfa_generate(Substitution *substs, guint numsubsts);
 SDFA *sdfa_generate(struct Substs *substs);
 
 void sdfa_print(SDFA a);
 
 gboolean sdfa_dump(SDFA a, const gchar *fname);
-//void free_automaton_data(Automaton a);
 
 gboolean sdfa_match_iter_automaton(SDFA a, GtkTextIter *iter, gchar **result);
 
 gboolean sdfa_match_iter(GtkTextIter *iter, gchar **result);
-
 
 #endif /* __SDFA_H__ */
