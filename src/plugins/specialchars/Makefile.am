@@ -11,8 +11,8 @@ endif
 
 specialchars_la_SOURCES = defs.h sc_utils.h \
 			  sdfa.c sdfa.h \
-													subst.c subst.h \
-													specialchars.c
+			  subst.c subst.h \
+			  specialchars.c
 
 specialchars_la_LDFLAGS = \
 	-avoid-version -module

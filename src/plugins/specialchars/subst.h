@@ -29,4 +29,4 @@ gboolean subst_load_from_file(
 
 gboolean subst_with_data_packed(struct Substs *substs);
 
-#endif /* __SUBSTITUTIONS_H__ */
+#endif /* __SUBST_H__ */
