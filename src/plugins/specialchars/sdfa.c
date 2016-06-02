@@ -257,8 +257,6 @@ gboolean sdfa_dump(SDFA a, const gchar *fname) {
     return FALSE;
   }
 
-  new.subst_buffer = g_new(gchar, new.subst_buffer_size);
-
   if (fread(&new.subst_buffer_size, sizeof(new.subst_buffer_size), 1, f) < 1) {
     debug_print("Error while reading subst buffer size. ");
     perror(NULL);
@@ -267,6 +265,8 @@ gboolean sdfa_dump(SDFA a, const gchar *fname) {
     g_free(fullpath);
     return FALSE;
   }
+
+  new.subst_buffer = g_new(gchar, new.subst_buffer_size);
 
   if (fread(new.subst_buffer,
         sizeof(*new.subst_buffer), new.subst_buffer_size, f) < new.table_size) {
