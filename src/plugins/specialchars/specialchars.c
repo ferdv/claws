@@ -70,9 +70,9 @@ static void specialchars_cb(GtkAction *action, gpointer data) {
     debug_print("Loading failed.");
     return;
   }
-  else {
+/*  else {
     subst_print_substs(substs);
-  }
+  }*/
  
   debug_print("with_buffer = %p\n", substs.with_buffer);
   debug_print("Constructing automaton.\n");
